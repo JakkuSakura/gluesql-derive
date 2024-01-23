@@ -11,7 +11,12 @@ fn test_fromgluesql_field_struct() {
         d: Option<i64>,
     }
     let data = Foo::from_gluesql_row(
-        &["a".to_string(), "b".to_string(), "c".to_string()],
+        &[
+            "a".to_string(),
+            "b".to_string(),
+            "c".to_string(),
+            "d".to_string(),
+        ],
         vec![
             Value::I64(1),
             Value::Bool(true),
@@ -24,4 +29,27 @@ fn test_fromgluesql_field_struct() {
     assert_eq!(data.b, true);
     assert_eq!(data.c, "hello");
     assert_eq!(data.d, None);
+}
+
+#[test]
+fn test_fromgluesql_field_struct_field_mismatch() {
+    #[derive(Debug, FromGlueSqlRow)]
+    #[allow(unused)]
+    struct Foo {
+        a: i64,
+        b: bool,
+        c: String,
+        d: Option<i64>,
+    }
+    let err = Foo::from_gluesql_row(
+        &["a".to_string()],
+        vec![
+            Value::I64(1),
+            Value::Bool(true),
+            Value::Str("hello".to_string()),
+            Value::Null,
+        ],
+    )
+    .unwrap_err();
+    println!("Expected error: {}", err);
 }

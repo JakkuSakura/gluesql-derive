@@ -212,7 +212,12 @@ impl FromRowField {
         let mut base = if self.flatten {
             unimplemented!("flatten field not supported")
         } else {
-            quote!(row.next().ok_or(::gluesql_derive::Error::InvalidExtract(#index, #column_name))?)
+            quote!({
+                if labels.get(#index).map(|x| x.as_str()) != Some(#column_name) {
+                    return Err(::gluesql_derive::Error::InvalidFieldName(#index, #column_name, labels.get(#index).cloned()));
+                }
+                row.next().ok_or(::gluesql_derive::Error::InvalidExtract(#index, #column_name))?
+            })
         };
 
         if self.from.is_some() {

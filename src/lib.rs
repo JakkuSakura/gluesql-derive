@@ -13,6 +13,8 @@ pub enum Error {
     InvalidConversion(&'static str, Value),
     #[error("could not extract field: {0} {1}")]
     InvalidExtract(usize, &'static str),
+    #[error("expected field {1} at {0}, but actual label is {2:?}")]
+    InvalidFieldName(usize, &'static str, Option<String>),
 }
 
 pub trait FromGlueSqlRow: Sized {
@@ -214,6 +216,14 @@ impl FromGlueSql for uuid::Uuid {
                 Ok(uuid::Uuid::from_slice(&uuid).unwrap())
             }
             _ => Err(Error::InvalidConversion("Uuid", value)),
+        }
+    }
+}
+impl FromGlueSql for std::net::IpAddr {
+    fn from_gluesql(value: Value) -> Result<Self, Error> {
+        match value {
+            Value::Inet(ip) => Ok(ip),
+            _ => Err(Error::InvalidConversion("IpAddr", value)),
         }
     }
 }
