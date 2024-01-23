@@ -3,7 +3,7 @@ members = ["gluesql-derive-proc"]
 
 [package]
 name = "gluesql-derive"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["JakkuSakura <qjk2001@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2021"
@@ -13,3 +13,7 @@ description = "Derive traits for GlueSQL"
 gluesql-derive-proc = { path = "gluesql-derive-proc", version = "0.1.1" }
 gluesql-core = "0.15.0"
 thiserror = "1.0"
+rust_decimal = "1"
+chrono = "0.4"
+uuid = "1.7"
+bytes = "1.5"

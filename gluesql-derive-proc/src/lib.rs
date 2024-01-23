@@ -86,18 +86,15 @@ impl DeriveFromRow {
             .map(|f| f.generate_from_row())
             .collect::<syn::Result<Vec<_>>>()?;
 
-        // let try_from_row_fields = self
-        //     .fields()
-        //     .iter()
-        //     .map(|f| f.generate_try_from_row())
-        //     .collect::<syn::Result<Vec<_>>>()?;
-
         Ok(quote! {
             impl #impl_generics ::gluesql_derive::FromGlueSqlRow for #ident #ty_generics where #(#original_predicates),* #(#predicates),* {
                 fn from_gluesql_row(labels: &[String], row: Vec<::gluesql_derive::gluesql_core::prelude::Value>) -> Result<Self, ::gluesql_derive::Error> {
-                    Ok(Self {
+                    let mut row = row.into_iter();
+                    let this = Self {
                         #(#from_row_fields), *
-                    })
+                    };
+                    drop(row);
+                    Ok(this)
                 }
 
             }
@@ -215,7 +212,7 @@ impl FromRowField {
         let mut base = if self.flatten {
             unimplemented!("flatten field not supported")
         } else {
-            quote!(row.get(#index).ok_or(::gluesql_derive::Error::InvalidExtract(#index, #column_name))?)
+            quote!(row.next().ok_or(::gluesql_derive::Error::InvalidExtract(#index, #column_name))?)
         };
 
         if self.from.is_some() {
@@ -228,26 +225,4 @@ impl FromRowField {
 
         Ok(quote!(#ident: #base))
     }
-
-    // /// Generate the line needed to retrieve this field from a row when calling `try_from_row`.
-    // fn generate_try_from_row(&self) -> Result<TokenStream2> {
-    //     let ident = self.ident.as_ref().unwrap();
-    //     let column_name = self.column_name();
-    //     let field_ty = &self.ty;
-    //     let target_ty = self.target_ty()?;
-    //
-    //     let mut base = if self.flatten {
-    //         quote!(<#target_ty as postgres_from_row::FromRow>::try_from_row(row)?)
-    //     } else {
-    //         quote!(postgres_from_row::tokio_postgres::Row::try_get::<&str, #target_ty>(row, #column_name)?)
-    //     };
-    //
-    //     if self.from.is_some() {
-    //         base = quote!(<#field_ty as std::convert::From<#target_ty>>::from(#base));
-    //     } else if self.try_from.is_some() {
-    //         base = quote!(<#field_ty as std::convert::TryFrom<#target_ty>>::try_from(#base)?);
-    //     };
-    //
-    //     Ok(quote!(#ident: #base))
-    // }
 }
