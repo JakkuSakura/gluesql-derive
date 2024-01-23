@@ -7,7 +7,9 @@ pub use gluesql_derive_proc::FromGlueSqlRow;
 use rust_decimal::Decimal;
 use std::any::type_name;
 use std::collections::HashMap;
-#[derive(Debug, thiserror::Error)]
+use std::fmt::Debug;
+
+#[derive(thiserror::Error)]
 pub enum Error {
     #[error("could not convert into type {0}: {1:?}")]
     InvalidConversion(&'static str, Value),
@@ -16,7 +18,11 @@ pub enum Error {
     #[error("expected field {1} at {0}, but actual label is {2:?}")]
     InvalidFieldName(usize, &'static str, Option<String>),
 }
-
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
+}
 pub trait FromGlueSqlRow: Sized {
     fn from_gluesql_row(labels: &[String], row: Vec<Value>) -> Result<Self, Error>;
     fn from_gluesql_rows(labels: &[String], rows: Vec<Vec<Value>>) -> Result<Vec<Self>, Error> {
