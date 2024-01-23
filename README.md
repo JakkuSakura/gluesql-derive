@@ -1,2 +1,2 @@
 # gluesql-derive
-generate traits like FromGlueSQL to enable basic ORM functionality
+generate traits like FromGlueSqlRow to enable basic ORM functionality
