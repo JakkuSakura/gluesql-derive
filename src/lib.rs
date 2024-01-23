@@ -54,3 +54,12 @@ impl FromGlueSql for bool {
         }
     }
 }
+
+impl<T: FromGlueSql> FromGlueSql for Option<T> {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::Null => Ok(None),
+            _ => Ok(Some(T::from_gluesql(value)?)),
+        }
+    }
+}

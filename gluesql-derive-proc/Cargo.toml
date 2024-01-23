@@ -1,6 +1,6 @@
 [package]
 name = "gluesql-derive-proc"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["JakkuSakura <qjk2001@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2021"
