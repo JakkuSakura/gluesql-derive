@@ -21,7 +21,30 @@ pub trait FromGlueSqlRow: Sized {
 pub trait FromGlueSql: Sized {
     fn from_gluesql(value: &Value) -> Result<Self, Error>;
 }
-
+impl FromGlueSql for i8 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::I8(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("i8", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for i16 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::I16(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("i16", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for i32 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::I32(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("i32", format!("{:?}", value))),
+        }
+    }
+}
 impl FromGlueSql for i64 {
     fn from_gluesql(value: &Value) -> Result<Self, Error> {
         match value {
@@ -30,11 +53,51 @@ impl FromGlueSql for i64 {
         }
     }
 }
+impl FromGlueSql for u8 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::U8(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("u8", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for u16 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::U16(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("u16", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for u32 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::U32(i) => Ok(*i),
+            _ => Err(Error::InvalidConversion("u32", format!("{:?}", value))),
+        }
+    }
+}
 impl FromGlueSql for u64 {
     fn from_gluesql(value: &Value) -> Result<Self, Error> {
         match value {
             Value::U64(i) => Ok(*i),
             _ => Err(Error::InvalidConversion("u64", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for f32 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::F32(f) => Ok(*f),
+            _ => Err(Error::InvalidConversion("f32", format!("{:?}", value))),
+        }
+    }
+}
+impl FromGlueSql for f64 {
+    fn from_gluesql(value: &Value) -> Result<Self, Error> {
+        match value {
+            Value::F64(f) => Ok(*f),
+            _ => Err(Error::InvalidConversion("f64", format!("{:?}", value))),
         }
     }
 }
