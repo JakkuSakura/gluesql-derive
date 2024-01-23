@@ -214,7 +214,7 @@ impl FromRowField {
         } else {
             quote!({
                 if labels.get(#index).map(|x| x.as_str()) != Some(#column_name) {
-                    return Err(::gluesql_derive::Error::InvalidFieldName(#index, #column_name, labels.get(#index).cloned()));
+                    return Err(::gluesql_derive::Error::InvalidFieldName(#index, #column_name, labels.get(#index).cloned().unwrap_or_default()));
                 }
                 row.next().ok_or(::gluesql_derive::Error::InvalidExtract(#index, #column_name))?
             })

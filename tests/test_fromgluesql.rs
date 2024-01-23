@@ -41,7 +41,7 @@ fn test_fromgluesql_field_struct_field_mismatch() {
         c: String,
         d: Option<i64>,
     }
-    let err = Foo::from_gluesql_row(
+    let _err = Foo::from_gluesql_row(
         &["a".to_string()],
         vec![
             Value::I64(1),
@@ -51,5 +51,5 @@ fn test_fromgluesql_field_struct_field_mismatch() {
         ],
     )
     .unwrap_err();
-    println!("Expected error: {}", err);
+    // println!("Expected error: {}", err);
 }

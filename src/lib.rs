@@ -13,10 +13,10 @@ use std::fmt::Debug;
 pub enum Error {
     #[error("could not convert into type {0}: {1:?}")]
     InvalidConversion(&'static str, Value),
-    #[error("could not extract field: {0} {1}")]
+    #[error("could not extract field: {0} {1:?}")]
     InvalidExtract(usize, &'static str),
-    #[error("expected field {1} at {0}, but actual label is {2:?}")]
-    InvalidFieldName(usize, &'static str, Option<String>),
+    #[error("expected field {0} {1:?}, but actual label is {2:?}")]
+    InvalidFieldName(usize, &'static str, String),
 }
 impl Debug for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
