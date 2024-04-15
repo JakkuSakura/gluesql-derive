@@ -95,7 +95,7 @@ impl ToGlueSql for chrono::DateTime<chrono::Utc> {
 }
 impl ToGlueSql for chrono::NaiveDateTime {
     fn to_gluesql(&self) -> ExprNode<'static> {
-        num(self.timestamp_micros())
+        num(self.and_utc().timestamp_micros())
     }
 }
 impl ToGlueSql for chrono::NaiveTime {
