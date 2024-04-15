@@ -152,7 +152,7 @@ impl FromGlueSql for chrono::NaiveDate {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
             Value::Str(s) => chrono::NaiveDate::from_str(&s)
-                .map_err(|e| Error::InvalidConversion("NaiveDate", Value::Str(s))),
+                .map_err(|_e| Error::InvalidConversion("NaiveDate", Value::Str(s))),
             Value::Date(d) => Ok(d),
             _ => Err(Error::InvalidConversion("NaiveDate", value)),
         }
@@ -178,7 +178,7 @@ impl FromGlueSql for chrono::DateTime<Utc> {
                 .timestamp_micros(i)
                 .single()
                 .ok_or(Error::InvalidConversion("DateTime<Utc>", value)),
-            Value::Time(d) => Ok(d.into()),
+
             // There is no Value::TimestampTz
             Value::Timestamp(d) => Ok(d.and_utc()),
             _ => Err(Error::InvalidConversion("DateTime<Utc>", value)),
