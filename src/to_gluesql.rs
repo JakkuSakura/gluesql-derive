@@ -66,7 +66,7 @@ impl ToGlueSql for u64 {
 }
 impl ToGlueSql for bool {
     fn to_gluesql(&self) -> ExprNode<'static> {
-        num(*self as i64)
+        (*self).into()
     }
 }
 impl<T: ToGlueSql> ToGlueSql for Option<T> {
