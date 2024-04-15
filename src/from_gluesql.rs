@@ -1,9 +1,12 @@
-use crate::Error;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
-use gluesql_core::data::{Interval, Value};
-use rust_decimal::Decimal;
 use std::any::type_name;
 use std::collections::HashMap;
+use std::str::FromStr;
+
+use chrono::{TimeZone, Utc};
+use gluesql_core::data::{Interval, Value};
+
+use crate::Error;
+
 pub trait FromGlueSql: Sized {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error>;
 }
@@ -137,7 +140,7 @@ impl FromGlueSql for bytes::Bytes {
         }
     }
 }
-impl FromGlueSql for Decimal {
+impl FromGlueSql for rust_decimal::Decimal {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
             Value::Decimal(d) => Ok(d),
@@ -145,25 +148,37 @@ impl FromGlueSql for Decimal {
         }
     }
 }
-impl FromGlueSql for NaiveDate {
+impl FromGlueSql for chrono::NaiveDate {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
+            Value::Str(s) => chrono::NaiveDate::from_str(&s)
+                .map_err(|e| Error::InvalidConversion("NaiveDate", Value::Str(s))),
             Value::Date(d) => Ok(d),
             _ => Err(Error::InvalidConversion("NaiveDate", value)),
         }
     }
 }
-impl FromGlueSql for NaiveDateTime {
+impl FromGlueSql for chrono::NaiveDateTime {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
+            Value::I64(i) => Utc
+                .timestamp_micros(i)
+                .single()
+                .map(|d| d.naive_utc())
+                .ok_or(Error::InvalidConversion("NaiveDateTime", value)),
             Value::Timestamp(d) => Ok(d),
             _ => Err(Error::InvalidConversion("NaiveDateTime", value)),
         }
     }
 }
-impl FromGlueSql for DateTime<Utc> {
+impl FromGlueSql for chrono::DateTime<Utc> {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
+            Value::I64(i) => Utc
+                .timestamp_micros(i)
+                .single()
+                .ok_or(Error::InvalidConversion("DateTime<Utc>", value)),
+            Value::Time(d) => Ok(d.into()),
             // There is no Value::TimestampTz
             Value::Timestamp(d) => Ok(d.and_utc()),
             _ => Err(Error::InvalidConversion("DateTime<Utc>", value)),
@@ -173,6 +188,7 @@ impl FromGlueSql for DateTime<Utc> {
 impl FromGlueSql for chrono::Duration {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
+            Value::I64(m) => Ok(chrono::Duration::microseconds(m)),
             Value::Interval(Interval::Microsecond(m)) => Ok(chrono::Duration::microseconds(m)),
             _ => Err(Error::InvalidConversion("chrono::Duration", value)),
         }
@@ -181,6 +197,7 @@ impl FromGlueSql for chrono::Duration {
 impl FromGlueSql for std::time::Duration {
     fn from_gluesql(value: Value) -> gluesql_core::error::Result<Self, Error> {
         match value {
+            Value::I64(m) => Ok(std::time::Duration::from_micros(m as u64)),
             Value::Interval(Interval::Microsecond(m)) => {
                 Ok(std::time::Duration::from_micros(m as u64))
             }
