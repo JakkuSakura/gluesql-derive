@@ -13,7 +13,8 @@ mod from_gluesql;
 pub use from_gluesql::FromGlueSql;
 mod to_gluesql;
 pub use to_gluesql::ToGlueSql;
-
+mod reflect_gluesql;
+pub use reflect_gluesql::ReflectGlueSql;
 #[derive(thiserror::Error)]
 pub enum Error {
     #[error("could not convert into type {0}: {1:?}")]
@@ -29,6 +30,7 @@ impl Debug for Error {
     }
 }
 pub trait ReflectGlueSqlRow {
+    fn get_ddl(table: &str) -> String;
     fn columns() -> Vec<&'static str>;
 }
 pub trait FromGlueSqlRow: Sized {

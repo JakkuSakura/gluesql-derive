@@ -14,6 +14,7 @@ pub fn derive_reflect_row(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     reflect_row::try_derive_reflect_row(&derive_input)
         .unwrap_or_else(|err| err.write_errors().into())
+        .into()
 }
 
 #[proc_macro_derive(FromGlueSqlRow, attributes(gluesql))]

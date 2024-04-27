@@ -10,5 +10,6 @@ fn test_reflectgluesql_field_struct() {
         c: String,
         d: Option<i64>,
     }
+    println!("{}", Foo::get_ddl("foo"));
     assert_eq!(Foo::columns(), vec!["a", "b", "c", "d"]);
 }
