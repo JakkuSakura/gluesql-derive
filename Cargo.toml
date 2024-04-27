@@ -3,7 +3,7 @@ members = ["gluesql-derive-proc"]
 
 [package]
 name = "gluesql-derive"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["JakkuSakura <qjk2001@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2021"

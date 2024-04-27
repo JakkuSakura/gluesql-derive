@@ -171,6 +171,14 @@ impl ReflectGlueSql for chrono::NaiveDateTime {
         "TIMESTAMP NOT NULL".to_string()
     }
 }
+impl ReflectGlueSql for chrono::DateTime<chrono::Utc> {
+    fn reflect_gluesql_type() -> String {
+        "TIMESTAMP".to_string()
+    }
+    fn reflect_gluesql_type_with_nullability() -> String {
+        "TIMESTAMP NOT NULL".to_string()
+    }
+}
 impl ReflectGlueSql for chrono::NaiveTime {
     fn reflect_gluesql_type() -> String {
         "TIME".to_string()
