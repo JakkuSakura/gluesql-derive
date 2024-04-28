@@ -1,7 +1,7 @@
 use darling::ast::Data;
 use darling::{Error, FromDeriveInput, FromField};
-use quote::{quote, ToTokens};
-use syn::__private::TokenStream2;
+use proc_macro2::TokenStream as TokenStream2;
+use quote::ToTokens;
 
 /// Main struct for deriving `FromRow` for a struct.
 #[derive(Debug, FromDeriveInput)]
@@ -13,7 +13,7 @@ use syn::__private::TokenStream2;
 pub struct DeriveGluesqlRow {
     pub ident: syn::Ident,
     pub generics: syn::Generics,
-    pub data: Data<(), FromRowField>,
+    pub data: Data<(), GluesqlField>,
 }
 
 impl DeriveGluesqlRow {
@@ -34,19 +34,8 @@ impl DeriveGluesqlRow {
         Ok(())
     }
 
-    /// Generates any additional where clause predicates needed for the fields in this struct.
-    pub fn predicates(&self) -> syn::Result<Vec<TokenStream2>> {
-        let mut predicates = Vec::new();
-
-        for field in self.fields() {
-            field.add_predicates(&mut predicates)?;
-        }
-
-        Ok(predicates)
-    }
-
     /// Provides a slice of this struct's fields.
-    pub fn fields(&self) -> &[FromRowField] {
+    pub fn fields(&self) -> &[GluesqlField] {
         match &self.data {
             Data::Struct(fields) => &fields.fields,
             _ => panic!("invalid shape"),
@@ -56,7 +45,7 @@ impl DeriveGluesqlRow {
 /// A single field inside a struct that derives `FromRow`
 #[derive(Debug, FromField)]
 #[darling(attributes(from_row), forward_attrs(allow, doc, cfg))]
-pub struct FromRowField {
+pub struct GluesqlField {
     #[darling(default)]
     pub index: usize,
     /// The identifier of this field.
@@ -78,7 +67,7 @@ pub struct FromRowField {
     pub rename: Option<String>,
 }
 
-impl FromRowField {
+impl GluesqlField {
     /// Checks wether this field has a valid combination of attributes
     pub fn validate(&self) -> syn::Result<()> {
         if self.from.is_some() && self.try_from.is_some() {
@@ -117,37 +106,5 @@ impl FromRowField {
             .as_ref()
             .map(Clone::clone)
             .unwrap_or_else(|| self.ident.as_ref().unwrap().to_string())
-    }
-
-    /// Pushes the needed where clause predicates for this field.
-    ///
-    /// By default this is `T: postgres::types::FromSql`,
-    /// when using `flatten` it's: `T: postgres_from_row::FromRow`
-    /// and when using either `from` or `try_from` attributes it additionally pushes this bound:
-    /// `T: std::convert::From<R>`, where `T` is the type specified in the struct and `R` is the
-    /// type specified in the `[try]_from` attribute.
-    pub fn add_predicates(&self, predicates: &mut Vec<TokenStream2>) -> syn::Result<()> {
-        let target_ty = &self.target_ty()?;
-        let ty = &self.ty;
-
-        predicates.push(if self.flatten {
-            quote! (#target_ty: ::gluesql_derive::FromRow)
-        } else {
-            quote! (#target_ty: ::gluesql_derive::FromGlueSql)
-        });
-
-        if self.from.is_some() {
-            predicates.push(quote!(#ty: std::convert::From<#target_ty>))
-        } else if self.try_from.is_some() {
-            let try_from = quote!(std::convert::TryFrom<#target_ty>);
-
-            predicates.push(quote!(#ty: #try_from));
-            predicates.push(
-                quote!(::gluesql_derive::Error: std::convert::From<<#ty as #try_from>::Error>),
-            );
-            predicates.push(quote!(<#ty as #try_from>::Error: std::fmt::Debug));
-        }
-
-        Ok(())
     }
 }

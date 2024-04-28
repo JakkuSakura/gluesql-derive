@@ -1,4 +1,4 @@
-use gluesql_core::ast_builder::{date, expr, null, num, text, ExprNode};
+use gluesql_core::ast_builder::{date, expr, null, num, text, timestamp, ExprNode};
 
 pub trait ToGlueSql {
     fn to_gluesql(&self) -> ExprNode<'static>;
@@ -89,7 +89,7 @@ impl ToGlueSql for rust_decimal::Decimal {
 }
 impl ToGlueSql for chrono::DateTime<chrono::Utc> {
     fn to_gluesql(&self) -> ExprNode<'static> {
-        num(self.timestamp_micros())
+        timestamp(self.to_rfc3339())
     }
 }
 impl ToGlueSql for chrono::NaiveDateTime {

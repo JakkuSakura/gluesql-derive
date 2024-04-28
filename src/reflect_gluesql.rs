@@ -195,6 +195,14 @@ impl ReflectGlueSql for chrono::Duration {
         "INTERVAL NOT NULL".to_string()
     }
 }
+impl ReflectGlueSql for std::time::Duration {
+    fn reflect_gluesql_type() -> String {
+        "INTERVAL".to_string()
+    }
+    fn reflect_gluesql_type_with_nullability() -> String {
+        "INTERVAL NOT NULL".to_string()
+    }
+}
 impl ReflectGlueSql for bytes::Bytes {
     fn reflect_gluesql_type() -> String {
         "BYTEA".to_string()
